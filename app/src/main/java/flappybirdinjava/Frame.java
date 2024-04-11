@@ -2,6 +2,9 @@ package flappybirdinjava;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import java.util.Timer;
+import java.util.TimerTask;
+
 
 public class Frame extends JFrame
 {
@@ -12,7 +15,9 @@ public class Frame extends JFrame
     private float sizeMultiply = 1.0f; //프레임 크기 배율을 정해주기 위함
     private final int ORIGIN_SIZE = 512;    //상수값 프레임 사이즈
     
-    BackgroundPanel panBackground = new BackgroundPanel();
+    private BackgroundPanel panBackground = new BackgroundPanel();
+    private Timer timer = new Timer();
+    private TimerTask timerTask;
    
     public Frame()
     {
@@ -28,11 +33,31 @@ public class Frame extends JFrame
 
 
         add(panBackground);
+
+        timerTask = new TimerTask() 
+        {
+            
+            @Override
+            public void run()
+            {
+                panBackground.update();
+                
+            }
+        };
+        
+        timer.scheduleAtFixedRate(timerTask, 0, 10);   //ms 단위
+
+
     }
 
     public float getSizeMultiply() //GameObject에서 Frame의 크기를 받기위한 get함수
     {
         return sizeMultiply;
+    }
+
+    public BackgroundPanel getBackgroundPanel()
+    {
+        return panBackground;
     }
 
     @Override

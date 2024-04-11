@@ -27,4 +27,17 @@ public class Main
     {
         return frame;
     }
+
+    public static int Clamp(int num, int min, int max)
+    {
+        if(num < min)
+        {
+            return min;
+        }
+        else if(num > max)
+        {
+            return max;
+        }
+        return num;
+    }
 }
