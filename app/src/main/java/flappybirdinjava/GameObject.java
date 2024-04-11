@@ -38,7 +38,7 @@ public abstract class GameObject extends JPanel
 
     public GameObject()
     {
-        setBackground(null);
+        setBackground(new Color(255,0,0,0));
     }
 
 }
