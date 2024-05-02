@@ -9,7 +9,10 @@ import java.util.TimerTask;
 public class Frame extends JFrame {
     private BackgroundPanel pnlGame = new BackgroundPanel();
     private Timer timer = new Timer();
-    private Timer respawn = new Timer();
+
+    //준영이 버전 하기 전 찬이의 생각
+    //private Timer respawn = new Timer();
+
     private TimerTask timerTask;
 
     private static Dimension scrnSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -18,7 +21,6 @@ public class Frame extends JFrame {
 
     //Components
     Bird bird = new Bird();
-   
 
     //Variable
     private float sizeMultiply = 1.0f;
@@ -60,21 +62,42 @@ public class Frame extends JFrame {
         timerTask = new TimerTask() {
             @Override
             public void run() {
-                pnlGame.update();
-
+                pnlGame.update();   //패널 전체 업데이트
             }
         };
         timer.scheduleAtFixedRate(timerTask, 0, 10);
 
+
+        /* 
+        //준영이 버전 하기 전 찬이의 생각
         timerTask = new TimerTask() {
             @Override
             public void run() {
-
                 respawnPipe();
 
             }
         };
         respawn.scheduleAtFixedRate(timerTask, 0, 2000);
+        */
+
+
+        Timer pipeSpawnTimer = new Timer();
+        TimerTask pipeSpawnTimerTask = new TimerTask()
+        {
+            @Override
+            public void run()
+            {
+                // #TODO : 파이프 생성 구문 추가
+                int randY = (int)(Math.random() * 472);
+                int clampY = Main.clamp(randY, PipeSpawn.GAP + Pipe.MIN_HEIGHT,
+                 472 - PipeSpawn.GAP - Pipe.MIN_HEIGHT );
+
+                PipeSpawn.spawnPipe( pnlGame, clampY );
+
+            }
+        };
+        pipeSpawnTimer.scheduleAtFixedRate(pipeSpawnTimerTask, PipeSpawn.SPAWN_DELAY, PipeSpawn.SPAWN_DELAY);
+
 
     } //Constructor
 
@@ -109,19 +132,23 @@ public class Frame extends JFrame {
         }
     }
 
-    private void respawnPipe()
-    {
-        Pipe_up pipe_up = new Pipe_up();
-        Pipe_down pipe_down = new Pipe_down();
 
-        pipe_up.setLocation(480, 300);
-        pipe_up.setSize(20,40 );
-        pnlGame.add(pipe_up);
+    //준영이 버전 하기 전 찬이의 생각
+    // private void respawnPipe()  //파이프 생성
+    // {
+    //     Pipe_up pipe_up = new Pipe_up();
+    //     Pipe_down pipe_down = new Pipe_down();
 
-        pipe_down.setLocation(480, -200);
-        pipe_down.setSize(20,40 );
-        pnlGame.add(pipe_down);
-    }
+        
+
+    //     pipe_up.setLocation(480, 200);      //-300~200?
+    //     pipe_up.setSize(20,40 );
+    //     pnlGame.add(pipe_up);
+
+    //     pipe_down.setLocation(480, -300);       //-300~200?
+    //     pipe_down.setSize(20,40 );
+    //     pnlGame.add(pipe_down);
+    // }
 
 
     
