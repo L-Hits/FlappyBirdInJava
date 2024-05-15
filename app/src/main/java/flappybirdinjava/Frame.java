@@ -10,9 +10,6 @@ public class Frame extends JFrame {
     private BackgroundPanel pnlGame = new BackgroundPanel();
     private Timer timer = new Timer();
 
-    //준영이 버전 하기 전 찬이의 생각
-    //private Timer respawn = new Timer();
-
     private TimerTask timerTask;
 
     private Timer pipeSpawnTimer;
@@ -41,29 +38,25 @@ public class Frame extends JFrame {
 
         //Game Screen
         pnlGame.setLayout(null);
+
         scoreText.setLocation(0,0);
         scoreText.setSize(0,0);
         pnlGame.add(scoreText);
 
+        
         bird.setLocation(100, 100);
         bird.setSize(100, 100);
         pnlGame.add(bird);
 
-
-        // /* 
-        // pipe_up.setLocation(480, 300);
-        // pipe_up.setSize(20,40 );
-        // pnlGame.add(pipe_up);
-
-        // pipe_down.setLocation(480, -200);
-        // pipe_down.setSize(20,40 );
-        // pnlGame.add(pipe_down);
-        // */
-
-
-
+        
         add(pnlGame, "Game");
+
         pnlGame.addMouseListener( new MyMouseListener() );
+        pnlGame.addKeyListener( new MyKeyAdapter() );
+
+        pnlGame.setFocusable(true);  // 컴포넌트가 포커스를 받을 수 있도록 설정
+        pnlGame.requestFocus();     // 컴포넌트에 포커스를 강제로 지정
+        
 
 
         //Timer
@@ -77,20 +70,6 @@ public class Frame extends JFrame {
             }
         };
         timer.scheduleAtFixedRate(timerTask, 0, 10);
-
-
-        /* 
-        //준영이 버전 하기 전 찬이의 생각
-        timerTask = new TimerTask() {
-            @Override
-            public void run() {
-                respawnPipe();
-
-            }
-        };
-        respawn.scheduleAtFixedRate(timerTask, 0, 2000);
-        */
-
 
         pipeSpawnTimer = new Timer();
         pipeSpawnTimerTask = new TimerTask()
@@ -165,30 +144,18 @@ public class Frame extends JFrame {
         }
     }
 
-
-    //준영이 버전 하기 전 찬이의 생각
-    // private void respawnPipe()  //파이프 생성
-    // {
-    //     Pipe_up pipe_up = new Pipe_up();
-    //     Pipe_down pipe_down = new Pipe_down();
-
-        
-
-    //     pipe_up.setLocation(480, 200);      //-300~200?
-    //     pipe_up.setSize(20,40 );
-    //     pnlGame.add(pipe_up);
-
-    //     pipe_down.setLocation(480, -300);       //-300~200?
-    //     pipe_down.setSize(20,40 );
-    //     pnlGame.add(pipe_down);
-    // }
-
-
-
     private class MyKeyAdapter extends KeyAdapter{
-        //TODO 스페이스만 눌렀을 때만 점프
-        public void keyPressed(KeyEvent e) {
-            
+        public void keyPressed(KeyEvent e) 
+        {
+            int keycode = e.getKeyCode();
+
+            switch (keycode) {
+                case KeyEvent.VK_SPACE:
+                    bird.jump();
+                    break;
+            }
+
+
         }
     }
     
