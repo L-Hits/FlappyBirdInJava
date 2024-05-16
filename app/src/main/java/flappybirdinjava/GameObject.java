@@ -1,6 +1,7 @@
 package flappybirdinjava;
 
 import java.awt.*;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.util.stream.Stream;
 
@@ -101,7 +102,9 @@ class Bird extends GameObject {
     private final static Image imageDown = new ImageIcon( Main.getPath("/sprites/bird_downflap.png") ).getImage();
     private final static Image[] ImageArr = { imageMid, imageUp, imageDown };
     
-    public static int ImageArrCount = 0;
+    private int ImageArrIndex = 0;
+    private int ImageChangetime = 0;
+
     private float jump = 0f;
     private final float GRAVITY = 3f;
     private final float G_FORCE = 0.5f;
@@ -113,19 +116,29 @@ class Bird extends GameObject {
 
     @Override
     public void update() {
-
-        /* 
-        if(ImageArrCount > 2)
-        {
-            ImageArrCount = 0;
-        }
-        else
-        {   ImageArrCount++;
-            super(ImageArr[ImageArrCount]);
-        }
-        */
-
         super.update(); //이미지 적용
+
+        if( Main.getFrame().isGameStart() == false )
+        {
+            return;
+        }
+
+        //애니메이션
+        Image image = ImageArr[ImageArrIndex];
+        ImageChangetime++;
+        if(ImageChangetime >= 10)
+        {
+            ImageChangetime-= 10;
+            ImageArrIndex++;
+            if(ImageArrIndex >= ImageArr.length)
+            {
+                ImageArrIndex -= ImageArr.length;
+            }
+            image = ImageArr[ImageArrIndex];
+            setIamge(image);
+        }
+
+
 
         if ( jump > -GRAVITY) {
             jump -= G_FORCE;
@@ -135,7 +148,13 @@ class Bird extends GameObject {
         }
 
         y = Main.clamp( (int)(y - jump), 0, 472 - imageMid.getHeight(null) );
+
         setLocation(x, y);
+
+        if(y >= 472 - imageMid.getHeight(null))
+        {
+            Main.getFrame().gameOver();
+        }
     }
 
     public void jump() {
@@ -168,7 +187,11 @@ class Pipe extends GameObject   //파이프
         super.update();
 
         //이동
-        x -= _SPEED;
+        if(Main.getFrame().isGameStart() == true && Main.getFrame().isgameOver() == false)
+        {
+            x -= _SPEED;
+        }
+            
         setLocation(x, y);
 
         //제거
@@ -176,7 +199,6 @@ class Pipe extends GameObject   //파이프
         {
             getParent().remove(this);   //내가 있는 add()한 위치까지 찾아가서 지운다.
         }
-
 
         //Collision //충돌
         if( Main.getFrame().isgameOver() || getX() + getWidth() < bird.getX() )
@@ -314,6 +336,12 @@ class ScoreText extends GameObject
         updateImage();
     }
 
+    public void resetScore()
+    {
+        score = 0;
+        updateImage();
+    }
+
     public void addScore(int score)
     {
         try{
@@ -337,7 +365,6 @@ class ScoreText extends GameObject
         {
             offset += aryImage[k].getWidth(null) + Margin.X;
         }
-    
 
         int x = 256 - offset/2;
 
@@ -354,3 +381,65 @@ class ScoreText extends GameObject
     }
 
 }
+
+class Screen extends GameObject
+{
+    public Screen(Image image)
+    {
+        super(image);
+    }
+    @Override
+    public void update()
+    {
+        super.update(); //시험 문제랍니다.
+        setLocation(x, y);
+    }
+}
+
+
+class StartScreen extends Screen
+{
+    private static final Image IMAGE =  new ImageIcon( Main.getPath("/sprites/main.png") ).getImage();
+    public StartScreen()
+    {
+        super(IMAGE);
+    }
+
+}
+
+class GameOverScreen extends Screen
+{
+    private static final Image IMAGE =  new ImageIcon( Main.getPath("/sprites/game_over.png") ).getImage();
+    public GameOverScreen()
+    {
+        super(IMAGE);
+        setVisible(false);
+    }
+
+}
+
+class ResetButton extends Screen
+{
+    private static final Image IMAGE =  new ImageIcon( Main.getPath("/sprites/play.png") ).getImage();
+
+    public ResetButton()
+    {
+        super(IMAGE);
+        setVisible(false);
+
+        addMouseListener(new MyMouseListener());
+
+
+    }
+    private class MyMouseListener extends MouseAdapter
+    {
+        @Override
+        public void mousePressed(MouseEvent e) 
+        {
+
+            Main.getFrame().resetGame();
+
+        }
+    }
+}
+

@@ -22,10 +22,16 @@ public class Frame extends JFrame {
     //Components
     private Bird bird = new Bird();
     private ScoreText scoreText = new ScoreText();
+    private StartScreen startScreen = new StartScreen();
+    private GameOverScreen gameOverScreen = new GameOverScreen();
+    private ResetButton resetButton = new ResetButton();
+
     //Variable
     private float sizeMultiply = 1.0f;
     private final int ORIGIN_SIZE = 512;
+
     private boolean flagGameOver = false;
+    private boolean flagGameStart = false;
 
     public Frame() {
         //Initialize
@@ -39,15 +45,27 @@ public class Frame extends JFrame {
         //Game Screen
         pnlGame.setLayout(null);
 
+
+        startScreen.setLocation(164, 123);
+        startScreen.setSize(0, 0);
+        pnlGame.add(startScreen);
+
+        gameOverScreen.setLocation(160, 145);
+        gameOverScreen.setSize(0, 0);
+        pnlGame.add(gameOverScreen);
+
+        resetButton.setLocation(204, 276);
+        resetButton.setSize(0, 0);
+        pnlGame.add(resetButton);
+
         scoreText.setLocation(0,0);
         scoreText.setSize(0,0);
         pnlGame.add(scoreText);
 
         
-        bird.setLocation(100, 100);
+        bird.setLocation(100, 224);
         bird.setSize(100, 100);
         pnlGame.add(bird);
-
         
         add(pnlGame, "Game");
 
@@ -56,37 +74,16 @@ public class Frame extends JFrame {
 
         pnlGame.setFocusable(true);  // 컴포넌트가 포커스를 받을 수 있도록 설정
         pnlGame.requestFocus();     // 컴포넌트에 포커스를 강제로 지정
-        
-
 
         //Timer
         timerTask = new TimerTask() {   
             @Override
             public void run() {
-
                 pnlGame.update();   //패널 전체 업데이트
-
-
             }
         };
+
         timer.scheduleAtFixedRate(timerTask, 0, 10);
-
-        pipeSpawnTimer = new Timer();
-        pipeSpawnTimerTask = new TimerTask()
-        {
-            @Override
-            public void run()   //파이프 랜덤 생성
-            {
-                // #TODO : 파이프 생성 구문 추가
-                int randY = (int)(Math.random() * 472);
-                int clampY = Main.clamp(randY, PipeSpawn.GAP + Pipe.MIN_HEIGHT,
-                    472 - PipeSpawn.GAP - Pipe.MIN_HEIGHT );
-                
-                PipeSpawn.spawnPipe( pnlGame, clampY );
-
-            }
-        };
-        pipeSpawnTimer.scheduleAtFixedRate(pipeSpawnTimerTask, 0, PipeSpawn.SPAWN_DELAY);
 
 
     } //Constructor
@@ -104,6 +101,79 @@ public class Frame extends JFrame {
         scoreText.addScore(1);
     }
 
+    public void StartGame()
+    {
+        if(flagGameStart)
+        {
+            return;
+        }
+
+        flagGameStart = true;
+        flagGameOver = false;
+        startScreen.setVisible(false);
+       
+
+
+        pipeSpawnTimer = new Timer();
+        pipeSpawnTimerTask = new TimerTask()
+        {
+            @Override
+            public void run()   //파이프 랜덤 생성
+            {
+                // #TODO : 파이프 생성 구문 추가
+                int randY = (int)(Math.random() * 472);
+                int clampY = Main.clamp(randY, PipeSpawn.GAP + Pipe.MIN_HEIGHT,
+                    472 - PipeSpawn.GAP - Pipe.MIN_HEIGHT );
+                
+                PipeSpawn.spawnPipe( pnlGame, clampY );
+
+            }
+        };
+        pipeSpawnTimer.scheduleAtFixedRate(pipeSpawnTimerTask, 0, PipeSpawn.SPAWN_DELAY);
+    }
+
+    public void resetGame()
+    {
+        if(flagGameOver == false)
+        {
+            return;
+        }
+
+        flagGameStart = false;
+
+        pipeSpawnTimer.cancel();
+        pipeSpawnTimer.purge(); //그전에 있던 타이머를 없앰
+
+        startScreen.setVisible(true);  //수정
+        gameOverScreen.setVisible(false);
+        resetButton.setVisible(false);
+
+        scoreText.resetScore();
+
+        bird.setLocation(100, 224);
+        for (Component k  : pnlGame.getComponents() ) 
+        {
+            try 
+            {
+                Pipe pipe = (Pipe)k;
+                pnlGame.remove(pipe);
+            } 
+            catch (Exception e){}
+        }
+        repaint();  //객체를 지우면 그 것을 바로 실행해달라.
+        revalidate();
+    }
+
+    public void initGame()
+    {
+        pnlGame.update();
+    }
+        
+    public boolean isGameStart()
+    {
+        return flagGameStart;
+    }
+
     public Bird getBird()
     {
         return bird;
@@ -111,8 +181,16 @@ public class Frame extends JFrame {
 
     public void gameOver()
     {
+        if(flagGameOver)
+        {
+            return;
+        }
+
         flagGameOver = true;
         pipeSpawnTimer.cancel();    //타이머 끄는게 캔슬
+
+        gameOverScreen.setVisible(true);
+        resetButton.setVisible(true);
 
     }
 
@@ -140,6 +218,7 @@ public class Frame extends JFrame {
     private class MyMouseListener extends MouseAdapter {
         @Override
         public void mousePressed(MouseEvent e) {
+            StartGame();
             bird.jump();
         }
     }
@@ -154,8 +233,6 @@ public class Frame extends JFrame {
                     bird.jump();
                     break;
             }
-
-
         }
     }
     
